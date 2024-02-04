@@ -26,9 +26,9 @@ struct YourStruct {
 fn main() {
   let whatever_name = "test";
   let name2 = true;
-  YourStruct::whatever_method_your_trait_bring((whatever_name, name2));
+  YourStruct::whatever_method_your_trait_bring(&(whatever_name, name2));
 }
 ```
 
 For this to work, you need to pass through the whatever_name and name2 value to the right function. It is where this crate is helpfull.
-It will give you an easy way to get "&str, bool" to declare your method with a tuple of this elements type, a way to declare variables with corresponding names and values like "let msg = tuple.0; let is_true = tuple.1;" and right names of parameter to give to the function "msg, is_true".
+It will give you an easy way to get "&str, bool" to declare your method with a tuple of this elements type, a way to declare variables with corresponding names and values like "let (msg, is_true) = params;" and right names of parameter to give to the function "msg, is_true".

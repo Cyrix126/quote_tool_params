@@ -3,42 +3,32 @@
 
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::Index;
 /// from text "msg: &str, is_true: bool", return a TokenStream whith content that declares variables with the value of a tuple with the name and value of the variable corresponding to the text.
 // for example
 ///```
 ///use quote_tool_params::prepare_values_from_params;
 ///use proc_macro2::TokenStream;
 ///let params1 = "msg: &str";
-///let expected_result1: Vec<TokenStream> = vec!["let msg = params;".parse().unwrap()];
+///let expected_result1: TokenStream = "let msg = params;".parse().unwrap();
 ///let params2 = "msg: &str, is_true: bool";
-///let expected_result2: Vec<TokenStream> = vec!["let msg = params.0;".parse().unwrap(), "let is_true = params.1;".parse().unwrap()];
-///assert_eq!(prepare_values_from_params(params1, "params")[0].to_string(), expected_result1[0].to_string());
-///assert_eq!(prepare_values_from_params(params2, "params")[0].to_string(), expected_result2[0].to_string());
-///assert_eq!(prepare_values_from_params(params2, "params")[1].to_string(), expected_result2[1].to_string());
+///let expected_result2: TokenStream = "let (msg, is_true) = params;".parse().unwrap();
+///assert_eq!(prepare_values_from_params(params1, "params").to_string(), expected_result1.to_string());
+///assert_eq!(prepare_values_from_params(params2, "params").to_string(), expected_result2.to_string());
 ///```
-pub fn prepare_values_from_params(params: &str, name_tuple: &str) -> Vec<TokenStream> {
-    let mut token = Vec::new();
+pub fn prepare_values_from_params(params: &str, name_tuple: &str) -> TokenStream {
     let params_tuple_name: TokenStream = name_tuple.parse().unwrap();
-    let params_name = get_from_params(params, true);
-    let split = params_name.split(',');
-    let unit = split.clone().collect::<Vec<&str>>().len() <= 1;
-    for (index, name) in split.enumerate() {
-        if !name.is_empty() {
-            let name: TokenStream = name.parse().unwrap();
-            let index = Index::from(index);
-            if unit {
-                token.push(quote! {
-                    let #name = #params_tuple_name;
-                })
-            } else {
-                token.push(quote! {
-                    let #name = #params_tuple_name.#index;
-                })
-            }
+    let params_name: TokenStream = get_from_params(params, true).parse().unwrap();
+    if params.is_empty() {
+        TokenStream::new()
+    } else if params.contains(",") {
+        quote! {
+        let (#params_name) = #params_tuple_name;
+        }
+    } else {
+        quote! {
+        let #params_name = #params_tuple_name;
         }
     }
-    token
 }
 
 /// get a string of name of params or type of params dilimeted by comma.
