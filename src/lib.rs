@@ -9,7 +9,7 @@ use quote::quote;
 ///use quote_tool_params::prepare_values_from_params;
 ///use proc_macro2::TokenStream;
 ///let params1 = "msg: &str";
-///let expected_result1: TokenStream = "let msg = params;".parse().unwrap();
+///let expected_result1: TokenStream = "".parse().unwrap();
 ///let params2 = "msg: &str, is_true: bool";
 ///let expected_result2: TokenStream = "let (msg, is_true) = params;".parse().unwrap();
 ///assert_eq!(prepare_values_from_params(params1, "params").to_string(), expected_result1.to_string());
@@ -18,16 +18,12 @@ use quote::quote;
 pub fn prepare_values_from_params(params: &str, name_tuple: &str) -> TokenStream {
     let params_tuple_name: TokenStream = name_tuple.parse().unwrap();
     let params_name: TokenStream = get_from_params(params, true).parse().unwrap();
-    if params.is_empty() {
-        TokenStream::new()
-    } else if params.contains(",") {
+    if params.contains(",") {
         quote! {
         let (#params_name) = #params_tuple_name;
         }
     } else {
-        quote! {
-        let #params_name = #params_tuple_name;
-        }
+        TokenStream::new()
     }
 }
 
