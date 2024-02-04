@@ -64,3 +64,27 @@ pub fn get_from_params(params: &str, name_true_type_false: bool) -> String {
     }
     literal.join(", ")
 }
+
+/// from the parameters, get the borrowing type of the tuple.
+/// if the tuple has element(s) with mutable borrows, it will return &mut as TokenStream.
+/// If the tuple has immutable borrows, it will return & as TokenStream.
+/// If the tuple has owned elements, it will return an empty TokenStream.
+/// example:
+///```
+///use quote_tool_params::get_borrower;
+///let params_immutable = "msg: &str, is_true: bool";
+///let params_mutable = "msg: &mut String, is_true: bool";
+///let params_owned = "msg: String, is_true: bool";
+///assert_eq!("&".to_string(), get_borrower(params_immutable).to_string());
+///assert_eq!("& mut".to_string(), get_borrower(params_mutable).to_string());
+///assert_eq!("".to_string(), get_borrower(params_owned).to_string());
+///```
+pub fn get_borrower(params: &str) -> TokenStream {
+    if params.contains("&mut") {
+        return "&mut".parse().unwrap();
+    } else if params.contains("&") {
+        return "&".parse().unwrap();
+    } else {
+        "".parse().unwrap()
+    }
+}
